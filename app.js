@@ -17,7 +17,7 @@
   const easyMDE = new EasyMDE({
     element: document.getElementById("editor"),
     autoDownloadFontAwesome: false,
-    spellChecker: false,
+    spellChecker: true,
     status: false,
     maxHeight: "calc(100% - 120px)",
     placeholder: "Start writing…",
@@ -170,6 +170,30 @@
     toast(`Opened ${file.name}`);
   });
 
+/* ----------------------------------------------------------
+   File Handling API (OS "Open With")
+   ---------------------------------------------------------- */
+if ("launchQueue" in window) {
+  window.launchQueue.setConsumer(async (launchParams) => {
+    if (!launchParams.files || !launchParams.files.length) return;
+
+    const handle = launchParams.files[0];
+    const file = await handle.getFile();
+    const text = await file.text();
+
+    if (dirty && !confirm(`Discard unsaved changes and open ${file.name}?`)) return;
+
+    fileHandle = handle; // reuse it so Ctrl+S saves back to this file
+    easyMDE.value(text);
+    filenameEl.value = file.name;
+    localStorage.setItem(NAME_KEY, file.name);
+    localStorage.setItem(DRAFT_KEY, text);
+    markSaved(false);
+    updateCounts();
+    toast(`Opened ${file.name}`);
+  });
+}
+
   /* ----------------------------------------------------------
      Save / Save As
      ---------------------------------------------------------- */
@@ -245,6 +269,24 @@
 
   document.getElementById("btnSave").addEventListener("click", doSave);
   document.getElementById("btnSaveAs").addEventListener("click", doSaveAs);
+
+/* ----------------------------------------------------------
+   Autosave (writes to the open file handle periodically)
+   ---------------------------------------------------------- */
+const AUTOSAVE_INTERVAL = 30000; // 30s
+
+setInterval(async () => {
+  if (!dirty || !fileHandle) return;
+  try {
+    await writeToHandle(fileHandle);
+    markSaved(true);
+    toast("Autosaved");
+  } catch (err) {
+    console.error(err);
+    // Don't toast an error here — avoid nagging on a background failure;
+    // the save-dot will just stay red until the next successful save.
+  }
+}, AUTOSAVE_INTERVAL);
 
   /* ----------------------------------------------------------
      Keyboard shortcuts

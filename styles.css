@@ -257,7 +257,8 @@ button {
 .preview-container {
  max-width: 35em;
  justify-self: center;
- user-select: contain;
+ user-select: all;
+ line-height: 1.5;
 }
 
 /* ============================================================
