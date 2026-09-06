@@ -1,0 +1,329 @@
+/* ============================================================
+   Ledger — theme tokens
+   ============================================================ */
+:root {
+ color-scheme: light dark;
+  --paper: light-dark(white, black);
+  --paper-raised: #F6F7F3;
+  --ink: light-dark(black, white);
+  --ink-soft: #5B625C;
+  --rule: #D3D6CC;
+  --accent: #2E5C50;
+  --accent-ink: #F3F7F5;
+  --unsaved: #B8863B;
+  --danger: #A23B3B;
+
+  --font-serif: "Noto Serif", serif;
+  --font-sans: "Noto Sans", sans-serif;
+  --font-mono: "Liberation Mono", monospace;
+
+}
+
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  transition: background-color .15s ease, color .15s ease;
+}
+
+button {
+  font-family: inherit;
+}
+
+/* ============================================================
+   Top chrome
+   ============================================================ */
+.chrome {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper);
+}
+
+.chrome-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.brand {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: .01em;
+  white-space: nowrap;
+}
+
+.sep {
+  color: var(--rule);
+}
+
+.filename {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  color: var(--ink);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid transparent;
+  padding: 2px 2px;
+  min-width: 60px;
+  max-width: 280px;
+  flex: 0 1 auto;
+}
+
+.filename:hover,
+.filename:focus {
+  border-bottom-color: var(--rule);
+  outline: none;
+}
+
+.save-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex: none;
+}
+
+.save-dot.dirty {
+  background: var(--unsaved);
+}
+
+.save-dot.pulse {
+  animation: pulse .5s ease;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.8); }
+  100% { transform: scale(1); }
+}
+
+.save-state {
+  font-size: 12px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.chrome-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.btn {
+  font-size: 13px;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  border-color: var(--accent);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.btn-primary:hover {
+  filter: brightness(1.08);
+}
+
+.btn-icon {
+  padding: 6px 9px;
+}
+
+/* ============================================================
+   Editor
+   ============================================================ */
+.editor-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.EasyMDEContainer {
+  width: 100%;
+  max-width: 900px;
+  display: flex !important;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.EasyMDEContainer .editor-toolbar {
+  background: var(--paper);
+  border: none;
+  border-bottom: 1px solid var(--rule);
+  border-radius: 0;
+  opacity: 1;
+  padding: 8px 4px;
+  flex: none;
+}
+
+.EasyMDEContainer .editor-toolbar button {
+  color: var(--ink-soft) !important;
+  border-radius: 3px;
+}
+
+.EasyMDEContainer .editor-toolbar button:hover,
+.EasyMDEContainer .editor-toolbar button.active {
+  background: var(--paper-raised);
+  border-color: var(--rule);
+  color: var(--ink) !important;
+}
+
+.EasyMDEContainer .editor-toolbar i.separator {
+  border-left: 1px solid var(--rule);
+  border-right: none;
+}
+
+.CodeMirror {
+  flex: 1 1 auto;
+  min-height: 0;
+  border: none;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.CodeMirror-lines {
+ max-width: 35em;
+ justify-self: center;
+}
+
+.CodeMirror-scroll {
+  padding: 28px 32px 60px;
+  scrollbar-width: none;
+}
+
+.CodeMirror-cursor {
+  border-left-color: var(--ink);
+}
+
+.cm-s-easymde .cm-header { color: var(--accent); }
+.cm-s-easymde .cm-link,
+.cm-s-easymde .cm-url { color: var(--accent); }
+.cm-s-easymde .cm-quote { color: var(--ink-soft); font-style: italic; }
+.cm-s-easymde .cm-comment { color: var(--ink-soft); }
+
+.editor-preview,
+.editor-preview-side {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-serif);
+  padding: 28px 32px;
+}
+
+.editor-preview-side {
+  border-left: 1px solid var(--rule);
+}
+
+.editor-statusbar {
+  display: none;
+}
+
+.preview-container {
+ max-width: 35em;
+ justify-self: center;
+ user-select: contain;
+}
+
+/* ============================================================
+   Bottom status bar (our own)
+   ============================================================ */
+.statusbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 20px;
+  font-size: 12px;
+  color: var(--ink-soft);
+  border-top: 1px solid var(--rule);
+  background: var(--paper);
+  flex: none;
+}
+
+.statusbar-sep {
+  color: var(--rule);
+}
+
+.offline-badge i {
+  color: var(--accent);
+  margin-right: 4px;
+}
+
+/* ============================================================
+   Toast
+   ============================================================ */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 46px;
+  transform: translate(-50%, 12px);
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 13px;
+  padding: 8px 16px;
+  border-radius: 4px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease, transform .18s ease;
+  z-index: 20;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (max-width: 640px) {
+  .chrome { padding: 8px 12px; }
+  .brand { display: none; }
+  .sep { display: none; }
+  .filename { max-width: 140px; }
+  .btn { padding: 6px 9px; }
+  .btn span.label { display: none; }
+  .CodeMirror-scroll { padding: 18px 16px 40px; }
+  .editor-preview, .editor-preview-side { padding: 18px 16px; }
+  .statusbar { padding: 6px 12px; font-size: 11px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .save-dot.pulse { animation: none; }
+  .toast { transition: none; }
+}

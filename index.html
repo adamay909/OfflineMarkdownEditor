@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MDEditor</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+
+<link rel="stylesheet" href="vendor/fontawesome/css/font-awesome.min.css">
+<link rel="stylesheet" href="vendor/easymde.min.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="chrome">
+  <div class="chrome-left">
+    <span class="brand">MDEditor</span>
+    <span class="sep" aria-hidden="true">·</span>
+    <input id="filename" class="filename" value="untitled.md" spellcheck="false" autocomplete="off" aria-label="File name">
+    <span id="saveDot" class="save-dot" title="All changes saved" aria-hidden="true"></span>
+    <span id="saveState" class="save-state">saved</span>
+  </div>
+  <div class="chrome-right">
+    <button id="btnNew" class="btn" type="button" title="New file (Ctrl/Cmd+N)">New</button>
+    <button id="btnOpen" class="btn" type="button" title="Open file… (Ctrl/Cmd+O)">Open</button>
+    <button id="btnSave" class="btn btn-primary" type="button" title="Save (Ctrl/Cmd+S)">Save</button>
+    <button id="btnSaveAs" class="btn" type="button" title="Save as… (Ctrl/Cmd+Shift+S)">Save as</button>
+  </div>
+  <input id="fileInput" type="file" accept=".md,.markdown,.txt,text/markdown,text/plain" hidden>
+</header>
+
+<main class="editor-wrap">
+  <textarea id="editor"></textarea>
+</main>
+
+<footer class="statusbar">
+  <span id="counts">0 words · 0 characters</span>
+  <span class="statusbar-sep" aria-hidden="true">•</span>
+  <span id="offlineBadge" class="offline-badge">
+    <i class="fa fa-check-circle" aria-hidden="true"></i> ready offline
+  </span>
+  <span class="statusbar-sep" aria-hidden="true">•</span>
+  <span id="fsMode" class="fs-mode"></span>
+</footer>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="vendor/easymde.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
