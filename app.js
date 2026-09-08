@@ -6,31 +6,24 @@
 
   const hasFSAccess = "showOpenFilePicker" in window && "showSaveFilePicker" in window;
 
-  /* ----------------------------------------------------------
-     Theme
-     ---------------------------------------------------------- */
+  if (!hasFSAccess) {
+   window.alert("This app only works as intended on Chromium based browser such as: Chromium, Google Chrome, Microsoft Edge, Brave.")
+  }
+
   const root = document.documentElement;
 
-  /* ----------------------------------------------------------
-     Editor
-     ---------------------------------------------------------- */
   const easyMDE = new EasyMDE({
     element: document.getElementById("editor"),
     autoDownloadFontAwesome: false,
     spellChecker: true,
     status: false,
-    maxHeight: "calc(100% - 120px)",
+    maxHeight: "calc(100% - 4em)",
     placeholder: "Start writing…",
     toolbar: [
-      "link", "image", "table", "horizontal-rule", "|",
-      "preview", "side-by-side", "fullscreen", "|",
-      "guide"
+      "preview", "side-by-side", "fullscreen"
     ],
   });
 
-  /* ----------------------------------------------------------
-     Document state
-     ---------------------------------------------------------- */
   let fileHandle = null;   // File System Access handle, when available
   let dirty = false;
   let lastSavedValue = "";
@@ -70,7 +63,7 @@
     setDirty(false);
     if (pulse) {
       saveDot.classList.remove("pulse");
-      void saveDot.offsetWidth; // restart animation
+      void saveDot.offsetWidth; 
       saveDot.classList.add("pulse");
     }
   }
@@ -271,7 +264,7 @@ if ("launchQueue" in window) {
   document.getElementById("btnSaveAs").addEventListener("click", doSaveAs);
 
 /* ----------------------------------------------------------
-   Autosave (writes to the open file handle periodically)
+   Autosave 
    ---------------------------------------------------------- */
 const AUTOSAVE_INTERVAL = 30000; // 30s
 
@@ -283,7 +276,7 @@ setInterval(async () => {
     toast("Autosaved");
   } catch (err) {
     console.error(err);
-    // Don't toast an error here — avoid nagging on a background failure;
+    // Don"t toast an error here — avoid nagging on a background failure;
     // the save-dot will just stay red until the next successful save.
   }
 }, AUTOSAVE_INTERVAL);
@@ -302,11 +295,42 @@ setInterval(async () => {
   });
 
   /* ----------------------------------------------------------
-     Service worker (offline shell)
+     Service worker
      ---------------------------------------------------------- */
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js").catch((err) => console.warn("SW registration failed:", err));
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register('sw.js').then((registration) => {
+    
+    if (registration.waiting) {
+      notifyUserOfUpdate(registration.waiting);
+    }
+
+    registration.addEventListener('updatefound', () => {
+      const newWorker = registration.installing;
+
+      newWorker.addEventListener('statechange', () => {
+        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          notifyUserOfUpdate(newWorker);
+        }
+      });
     });
-  }
+  });
+
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!refreshing) {
+      refreshing = true;
+      window.location.reload();
+    }
+  });
+}
+
+function notifyUserOfUpdate(worker) {
+  const updateBanner = document.getElementById('updateNotice');
+  updateBanner.style.display = "inline";
+
+  document.getElementById('reloadBtn').onclick = () => {
+    worker.postMessage({ type: 'SKIP_WAITING' });
+  };
+}
 })();

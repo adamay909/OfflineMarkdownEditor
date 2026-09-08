@@ -1,5 +1,5 @@
 //change CACHE to trigger update
-const CACHE = "MDEditor-v1";
+const CACHE = "MDEditor-v101";
 
 const FILES = [
   "./",
@@ -14,6 +14,7 @@ const FILES = [
   "./vendor/fontawesome/fonts/fontawesome-webfont.woff2",
   "./vendor/fontawesome/fonts/fontawesome-webfont.woff",
   "./vendor/fontawesome/fonts/fontawesome-webfont.ttf",
+  "./vendor/fonts/NotoSansSymbols2-Regular.woff2",
 ];
 
 self.addEventListener("install", (event) => {
@@ -31,7 +32,6 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// Cache-first for the app shell; anything else falls back to network, then cache.
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
@@ -50,3 +50,11 @@ self.addEventListener("fetch", (event) => {
     })
   );
 });
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
+

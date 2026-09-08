@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE HTML>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -16,17 +16,16 @@
 
 <header class="chrome">
   <div class="chrome-left">
-    <span class="brand">MDEditor</span>
-    <span class="sep" aria-hidden="true">·</span>
     <input id="filename" class="filename" value="untitled.md" spellcheck="false" autocomplete="off" aria-label="File name">
     <span id="saveDot" class="save-dot" title="All changes saved" aria-hidden="true"></span>
     <span id="saveState" class="save-state">saved</span>
   </div>
   <div class="chrome-right">
-    <button id="btnNew" class="btn" type="button" title="New file (Ctrl/Cmd+N)">New</button>
-    <button id="btnOpen" class="btn" type="button" title="Open file… (Ctrl/Cmd+O)">Open</button>
-    <button id="btnSave" class="btn btn-primary" type="button" title="Save (Ctrl/Cmd+S)">Save</button>
-    <button id="btnSaveAs" class="btn" type="button" title="Save as… (Ctrl/Cmd+Shift+S)">Save as</button>
+    <button id="btnNew" class="btn" type="button" title="New file (Ctrl/Cmd+N)">&#x1F5CB;</button>
+    <button id="btnOpen" class="btn" type="button" title="Open file… (Ctrl/Cmd+O)">&#x1F5C1;</button>
+    <button id="btnSave" class="btn" type="button" title="Save (Ctrl/Cmd+S)">&#x1F5AB;</button>
+	<button id="btnSaveAs" class="btn" type="button" title="Save As" style="width: 42px">&#x1F5AB;<span style="font-size: 10px">as</span></button>
+	<button id="btnHelp" class="btn" type="button" title="Help" command="show-modal" commandfor="helpDialog">?</button>
   </div>
   <input id="fileInput" type="file" accept=".md,.markdown,.txt,text/markdown,text/plain" hidden>
 </header>
@@ -38,14 +37,42 @@
 <footer class="statusbar">
   <span id="counts">0 words · 0 characters</span>
   <span class="statusbar-sep" aria-hidden="true">•</span>
-  <span id="offlineBadge" class="offline-badge">
-    <i class="fa fa-check-circle" aria-hidden="true"></i> ready offline
-  </span>
   <span class="statusbar-sep" aria-hidden="true">•</span>
   <span id="fsMode" class="fs-mode"></span>
+  <span id="updateNotice" style="display: none"><button id="reloadBtn">Update Available. Reload.</button></span>
 </footer>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<dialog id="helpDialog" closedby="any">
+  <h3>Quick Markdown cheat sheet</h3> 
+  <table class="md-cheat-sheet">
+   <tr><td class="cheat-sheet">Headings:</td><td class="cheat-sheet"> <code>#, ##</code>, etc.</td></tr>
+   <tr><td class="cheat-sheet">Italic:</td><td class="cheat-sheet"> <code>*italic*</code></td></tr>
+   <tr><td class="cheat-sheet">Bold:</td><td class="cheat-sheet"> <code>**bold**</code></td></tr>
+   <tr><td class="cheat-sheet">Code:</td><td class="cheat-sheet"> <code>`code`</code></td></tr>
+   <tr><td class="cheat-sheet">Code Block:</td><td class="cheat-sheet"> <code>```code block```</code></td></tr>
+   <tr><td class="cheat-sheet">Block Quote:</td><td class="cheat-sheet"> <code>&gt;quote</code></td></tr>
+   <tr><td class="cheat-sheet">Unordered List:</td><td class="cheat-sheet"> <code>- list item</code></td></tr>
+   <tr><td class="cheat-sheet">Orderd List:</td><td class="cheat-sheet"> <code>1. list item</code></td></tr>
+   <tr><td class="cheat-sheet">Link:</td><td class="cheat-sheet"> <code>[text](url)</code></td></tr>
+   <tr><td class="cheat-sheet">Table:</td><td class="cheat-sheet"> <code>| cell 1 | cell 2 |</code></td></tr>
+  </table>
+
+ <p>Here is a link to a more <a href="https://www.markdownguide.org/cheat-sheet/">detailed Markdown cheat sheet</a>.
+
+ 
+ <details>
+  <summary style="margin-bottom: 1em"><h3 style="display: inline;">About this app</h3></summary>
+  <p> This is a webapp for editing <em>local</em> files and it can work entirely offline. It works best with browsers based on Chromium like: Chromium itself, Google Chrome, Micrsoft Edge, Brave. You can install this as an app (there is a button next to the address bar or thereabouts) and it will behave reasonably close to a real desktop application, or mobile app on Android. </p>
+
+  <p> Firefox and Safari do not implement some of the crucial APIs.</p>
+
+  <p> The Markdown editor is EasyMDE avaiable at: <a href="https://github.com/Ionaru/easy-markdown-editor/tree/master">https://github.com/Ionaru/easy-markdown-editor/tree/master</a>.
+  </p>
+
+ </details>
+</dialog> 
 
 <script src="vendor/easymde.min.js"></script>
 <script src="app.js"></script>

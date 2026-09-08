@@ -596,11 +596,13 @@ span.CodeMirror-selectedtext {
   opacity: 0.6;
   pointer-events: none;
 }
+
 @media only screen and (max-width: 700px) {
   .editor-toolbar i.no-mobile {
     display: none;
   }
 }
+
 .editor-statusbar {
   padding: 8px 10px;
   font-size: 12px;

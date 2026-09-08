@@ -1,0 +1,1 @@
+- add real quiet mode (hide toolbars)
