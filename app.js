@@ -6,9 +6,6 @@
 
   const hasFSAccess = "showOpenFilePicker" in window && "showSaveFilePicker" in window;
 
-  if (!hasFSAccess) {
-   window.alert("This app only works as intended on Chromium based browser such as: Chromium, Google Chrome, Microsoft Edge, Brave.")
-  }
 
   const root = document.documentElement;
 
@@ -24,7 +21,21 @@
     ],
   });
 
-  let fileHandle = null;   // File System Access handle, when available
+  if (!hasFSAccess) {
+    const warning=document.querySelector("#nonChromiumWarning")
+    warning.showModal();
+    const header = document.querySelector("header")
+    header.style.display="none"
+    const footer = document.querySelector("footer")
+    footer.style.justifyContent = "center";
+    const nfooter = document.querySelector(".normalFooter")
+	nfooter.style.display="none"
+    const wfooter = document.querySelector(".warnFooter")
+	wfooter.style.display="flex"
+   return
+  }
+  
+ let fileHandle = null;   
   let dirty = false;
   let lastSavedValue = "";
 
@@ -35,7 +46,7 @@
   const fsModeEl = document.getElementById("fsMode");
   const toastEl = document.getElementById("toast");
 
-  fsModeEl.textContent = hasFSAccess ? "direct file access" : "download / upload mode";
+  fsModeEl.textContent = "direct file access" 
 
   filenameEl.value = localStorage.getItem(NAME_KEY) || "untitled.md";
   const draft = localStorage.getItem(DRAFT_KEY);
@@ -118,7 +129,6 @@
   async function doOpen() {
     if (dirty && !confirm("Discard unsaved changes and open a different file?")) return;
 
-    if (hasFSAccess) {
       try {
         const [handle] = await window.showOpenFilePicker({
           types: [{
@@ -142,11 +152,9 @@
         if (err && err.name !== "AbortError") console.error(err);
       }
       return;
-    }
-
-    document.getElementById("fileInput").click();
   }
-  document.getElementById("btnOpen").addEventListener("click", doOpen);
+  
+ document.getElementById("btnOpen").addEventListener("click", doOpen);
 
   document.getElementById("fileInput").addEventListener("change", async (e) => {
     const file = e.target.files[0];
@@ -190,19 +198,6 @@ if ("launchQueue" in window) {
   /* ----------------------------------------------------------
      Save / Save As
      ---------------------------------------------------------- */
-  function downloadFallback(name) {
-    const blob = new Blob([easyMDE.value()], { type: "text/markdown" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = name;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    markSaved(true);
-    toast(`Downloaded ${name}`);
-  }
 
   async function writeToHandle(handle) {
     const writable = await handle.createWritable();
@@ -213,10 +208,6 @@ if ("launchQueue" in window) {
   async function doSave() {
     const name = filenameEl.value.trim() || "untitled.md";
 
-    if (!hasFSAccess) {
-      downloadFallback(name);
-      return;
-    }
 
     if (fileHandle) {
       try {
@@ -236,10 +227,6 @@ if ("launchQueue" in window) {
   async function doSaveAs() {
     const name = filenameEl.value.trim() || "untitled.md";
 
-    if (!hasFSAccess) {
-      downloadFallback(name);
-      return;
-    }
 
     try {
       const handle = await window.showSaveFilePicker({
@@ -276,8 +263,6 @@ setInterval(async () => {
     toast("Autosaved");
   } catch (err) {
     console.error(err);
-    // Don"t toast an error here — avoid nagging on a background failure;
-    // the save-dot will just stay red until the next successful save.
   }
 }, AUTOSAVE_INTERVAL);
 

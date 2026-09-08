@@ -35,11 +35,17 @@
 </main>
 
 <footer class="statusbar">
+ <div class="normalFooter">
   <span id="counts">0 words · 0 characters</span>
   <span class="statusbar-sep" aria-hidden="true">•</span>
   <span class="statusbar-sep" aria-hidden="true">•</span>
   <span id="fsMode" class="fs-mode"></span>
   <span id="updateNotice" style="display: none"><button id="reloadBtn">Update Available. Reload.</button></span>
+ </div>
+ <div class="warnFooter" style="display: none; justify-content: center">
+  <button id="chromiumWarning" command="show-modal" commandfor="nonChromiumWarning"><span style="color: red">Limited Functionality</span></button>
+ </div>
+
 </footer>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -66,14 +72,19 @@
   <summary style="margin-bottom: 1em"><h3 style="display: inline;">About this app</h3></summary>
   <p> This is a webapp for editing <em>local</em> files and it can work entirely offline. It works best with browsers based on Chromium like: Chromium itself, Google Chrome, Micrsoft Edge, Brave. You can install this as an app (there is a button next to the address bar or thereabouts) and it will behave reasonably close to a real desktop application, or mobile app on Android. </p>
 
-  <p> Firefox and Safari do not implement some of the crucial APIs.</p>
-
   <p> The Markdown editor is EasyMDE avaiable at: <a href="https://github.com/Ionaru/easy-markdown-editor/tree/master">https://github.com/Ionaru/easy-markdown-editor/tree/master</a>.
   </p>
 
  </details>
 </dialog> 
 
+<dialog id="nonChromiumWarning" closedby="any">
+ <p>This app works as intended only on Chromium based brosers such as: Chromium itself, Google Chrome, Microsoft Edge, Brave.</p>
+ <p>You might be able to edit markdown, but you cannot open or save to local files on your device.</p>
+ <div style="display:flex; justify-content:center">
+	<button class="btn" type="button" title="CloseWarning" command="close" commandfor="nonChromiumWarning">OK</button>
+	</ok>
+</dialog>
 <script src="vendor/easymde.min.js"></script>
 <script src="app.js"></script>
 </body>
