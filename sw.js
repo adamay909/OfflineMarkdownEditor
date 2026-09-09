@@ -1,5 +1,5 @@
 //change CACHE to trigger update
-const CACHE = "MDEditor-v109";
+const CACHE = "MDEditor-v113";
 
 const FILES = [
   "./",
@@ -8,8 +8,8 @@ const FILES = [
   "./app.js",
   "./manifest.json",
   "./icon.svg",
-  "./vendor/easymde.min.js",
-  "./vendor/easymde.min.css",
+  "./vendor/easymde.js",
+  "./vendor/easymde.css",
   "./vendor/fontawesome/css/font-awesome.min.css",
   "./vendor/fontawesome/fonts/fontawesome-webfont.woff2",
   "./vendor/fontawesome/fonts/fontawesome-webfont.woff",

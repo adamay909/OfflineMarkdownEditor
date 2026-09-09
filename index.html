@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="icon.svg">
 
 <link rel="stylesheet" href="vendor/fontawesome/css/font-awesome.min.css">
-<link rel="stylesheet" href="vendor/easymde.min.css">
+<link rel="stylesheet" href="vendor/easymde.css">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -65,16 +65,24 @@
    <tr><td class="cheat-sheet">Table:</td><td class="cheat-sheet"> <code>| cell 1 | cell 2 |</code></td></tr>
   </table>
 
- <p>Here is a link to a more <a href="https://www.markdownguide.org/cheat-sheet/">detailed Markdown cheat sheet</a>.
+ <p><a href="https://www.markdownguide.org/cheat-sheet/">More detailed Markdown cheat sheet</a>.
 
  
  <details>
   <summary style="margin-bottom: 1em"><h3 style="display: inline;">About this app</h3></summary>
-  <p> This is a webapp for editing <em>local</em> files and it can work entirely offline. It works best with browsers based on Chromium like: Chromium itself, Google Chrome, Micrsoft Edge, Brave. You can install this as an app (there is a button next to the address bar or thereabouts) and it will behave reasonably close to a real desktop application, or mobile app on Android. </p>
+  <p> This is a webapp for editing <em>local</em> files and it can work entirely offline. It works best with browsers based on Chromium like: Chromium itself, Google Chrome, Microsoft Edge, Brave. You can install this as an app (there is a button next to the address bar or thereabouts) and it will behave reasonably close to a real desktop application, or mobile app on Android. </p>
 
   <p> The Markdown editor is EasyMDE avaiable at: <a href="https://github.com/Ionaru/easy-markdown-editor/tree/master">https://github.com/Ionaru/easy-markdown-editor/tree/master</a>.
   </p>
-
+  <details>
+  <summary style="margin-bottom: 1em"><h4 style="display: inline;">License</h3></summary>
+  This webapp is in the public domain except for the following components:
+  <ul>
+   <li><a href="vendor/LICENSE">Easy Markdown Editor (MIT)</a></li>
+   <li><a href="https://fontawesome.com/v4/license/">Fontawesome (Font: SIL OFL 1.1, CSS: MIT)</a></li>
+   <li><a href="vendor/fonts/OFL.txt">Noto Sans Symbols 2 (SIL OFL 1.1)</a></li>
+  </ul>
+ </details>
  </details>
 </dialog> 
 
@@ -85,7 +93,7 @@
 	<button class="btn" type="button" title="CloseWarning" command="close" commandfor="nonChromiumWarning">OK</button>
 	</ok>
 </dialog>
-<script src="vendor/easymde.min.js"></script>
+<script src="vendor/easymde.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
