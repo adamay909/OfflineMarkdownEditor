@@ -30,10 +30,10 @@
     footer.style.justifyContent = "center";
     const nfooter = document.querySelector(".normalFooter")
 	nfooter.style.display="none"
-    const wfooter = document.querySelector(".warnFooter")
-	wfooter.style.display="flex"
    return
   }
+    const wfooter = document.querySelector(".warnFooter")
+	wfooter.style.display="none"
   
  let fileHandle = null;   
   let dirty = false;
@@ -43,10 +43,7 @@
   const saveDot = document.getElementById("saveDot");
   const saveStateEl = document.getElementById("saveState");
   const countsEl = document.getElementById("counts");
-  const fsModeEl = document.getElementById("fsMode");
   const toastEl = document.getElementById("toast");
-
-  fsModeEl.textContent = "direct file access" 
 
   filenameEl.value = localStorage.getItem(NAME_KEY) || "untitled.md";
   const draft = localStorage.getItem(DRAFT_KEY);
@@ -280,6 +277,30 @@ setInterval(async () => {
   });
 
   /* ----------------------------------------------------------
+     Toggle Spellcheck
+	 (spell checking is always on. What this does is show/hide
+	 highlighting of errors)
+     ---------------------------------------------------------- */
+
+const spTgl = document.getElementById("spellToggle")
+if (!spTgl) {
+ console.log("not found")
+}
+if (spTgl) {
+spTgl.addEventListener("click", toggleSpellcheck)
+}
+function toggleSpellcheck(e) {
+ e.preventDefault();
+ const css = document.getElementById("spellstyle")
+ css.disabled = !css.disabled
+
+ if (css.disabled) {
+  spTgl.innerHTML="Spellcheck: on"
+ } else {
+  spTgl.innerHTML="Spellcheck: off"
+}
+}
+  /* ----------------------------------------------------------
      Service worker
      ---------------------------------------------------------- */
 
@@ -301,12 +322,9 @@ if ("serviceWorker" in navigator) {
     });
   });
 
-  let refreshing = false;
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (!refreshing) {
       refreshing = true;
       window.location.reload();
-    }
   });
 }
 

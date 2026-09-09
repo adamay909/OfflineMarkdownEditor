@@ -273,13 +273,24 @@ button {
   flex: none;
 }
 
-.statusbar-sep {
-  color: var(--rule);
+.normalFooter {
+ display: flex;
+ width: 100%;
+ justify-content: space-between;
 }
 
-.offline-badge i {
-  color: var(--accent);
-  margin-right: 4px;
+.warnFooter {
+ display: flex;
+ justify-content: center;
+}
+
+button.sbBtn {
+ font: var(--font-sans);
+ color: var(--ink-soft);
+}
+
+.statusbar-sep {
+  color: var(--rule);
 }
 
 /* ============================================================

@@ -1,10 +1,11 @@
 //change CACHE to trigger update
-const CACHE = "MDEditor-v113";
+const CACHE = "MDEditor-v131";
 
 const FILES = [
   "./",
   "./index.html",
   "./styles.css",
+  "./custom.css",
   "./app.js",
   "./manifest.json",
   "./icon.svg",

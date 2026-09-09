@@ -4,7 +4,7 @@
   "description": "A markdown editor for local files.",
   "start_url": "/mdeditor/",
   "scope": "/mdeditor/",
-  "display": "standalone",
+  "display": "minimal-ui",
   "background_color": "#EEF0EA",
   "theme_color": "#EEF0EA",
   "orientation": "any",

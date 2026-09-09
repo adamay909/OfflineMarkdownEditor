@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="vendor/fontawesome/css/font-awesome.min.css">
 <link rel="stylesheet" href="vendor/easymde.css">
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="custom.css" id="spellstyle">
 </head>
 <body>
 
@@ -36,13 +37,13 @@
 
 <footer class="statusbar">
  <div class="normalFooter">
+  <div class="statusGroup">
   <span id="counts">0 words · 0 characters</span>
-  <span class="statusbar-sep" aria-hidden="true">•</span>
-  <span class="statusbar-sep" aria-hidden="true">•</span>
-  <span id="fsMode" class="fs-mode"></span>
-  <span id="updateNotice" style="display: none"><button id="reloadBtn">Update Available. Reload.</button></span>
- </div>
- <div class="warnFooter" style="display: none; justify-content: center">
+  </div>
+  <div class="statusGroup">
+  <span id="updateNotice" style="display: none"><button id="reloadBtn" class="sbBtn">Update Available. Reload.</button></span>
+   <span id="spellCheck"><button id="spellToggle" class="sbBtn">Spellcheck: off</button></span></div>
+ <div class="warnFooter">
   <button id="chromiumWarning" command="show-modal" commandfor="nonChromiumWarning"><span style="color: red">Limited Functionality</span></button>
  </div>
 
