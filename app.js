@@ -1,11 +1,11 @@
-(() => {
+(function () {
   "use strict";
 
   const DRAFT_KEY = "mdeditor:draft";
   const NAME_KEY = "mdeditor:filename";
 
-  const hasFSAccess = "showOpenFilePicker" in window && "showSaveFilePicker" in window;
-
+  const hasFSAccess =
+    "showOpenFilePicker" in window && "showSaveFilePicker" in window;
 
   const root = document.documentElement;
 
@@ -16,26 +16,25 @@
     status: false,
     maxHeight: "calc(100% - 4em)",
     placeholder: "Start writing…",
-    toolbar: [
-      "preview", "side-by-side", "fullscreen"
-    ],
+    toolbar: ["preview", "side-by-side", "fullscreen"],
   });
 
   if (!hasFSAccess) {
-    const warning=document.querySelector("#nonChromiumWarning")
+    const warning = document.querySelector("#nonChromiumWarning");
     warning.showModal();
-    const header = document.querySelector("header")
-    header.style.display="none"
-    const footer = document.querySelector("footer")
+    const header = document.querySelector("header");
+    header.style.display = "none";
+    const footer = document.querySelector("footer");
     footer.style.justifyContent = "center";
-    const nfooter = document.querySelector(".normalFooter")
-	nfooter.style.display="none"
-   return
+    const nfooter = document.querySelector(".normalFooter");
+    nfooter.style.display = "none";
+    return;
   }
-    const wfooter = document.querySelector(".warnFooter")
-	wfooter.style.display="none"
-  
- let fileHandle = null;   
+
+  const wfooter = document.querySelector(".warnFooter");
+  wfooter.style.display = "none";
+
+  let fileHandle = null;
   let dirty = false;
   let lastSavedValue = "";
 
@@ -71,7 +70,7 @@
     setDirty(false);
     if (pulse) {
       saveDot.classList.remove("pulse");
-      void saveDot.offsetWidth; 
+      void saveDot.offsetWidth;
       saveDot.classList.add("pulse");
     }
   }
@@ -93,6 +92,7 @@
   filenameEl.addEventListener("input", () => {
     localStorage.setItem(NAME_KEY, filenameEl.value);
   });
+
   filenameEl.addEventListener("keydown", (e) => {
     if (e.key === "Enter") filenameEl.blur();
   });
@@ -108,7 +108,8 @@
      New
      ---------------------------------------------------------- */
   function doNew() {
-    if (dirty && !confirm("Discard unsaved changes and start a new file?")) return;
+    if (dirty && !confirm("Discard unsaved changes and start a new file?"))
+      return;
     easyMDE.value("");
     fileHandle = null;
     filenameEl.value = "untitled.md";
@@ -124,34 +125,40 @@
      Open
      ---------------------------------------------------------- */
   async function doOpen() {
-    if (dirty && !confirm("Discard unsaved changes and open a different file?")) return;
-
-      try {
-        const [handle] = await window.showOpenFilePicker({
-          types: [{
-            description: "Markdown / text",
-            accept: { "text/markdown": [".md", ".markdown"], "text/plain": [".txt"] },
-          }],
-          excludeAcceptAllOption: false,
-          multiple: false,
-        });
-        const file = await handle.getFile();
-        const text = await file.text();
-        fileHandle = handle;
-        easyMDE.value(text);
-        filenameEl.value = file.name;
-        localStorage.setItem(NAME_KEY, file.name);
-        localStorage.setItem(DRAFT_KEY, text);
-        markSaved(false);
-        updateCounts();
-        toast(`Opened ${file.name}`);
-      } catch (err) {
-        if (err && err.name !== "AbortError") console.error(err);
-      }
+    if (dirty && !confirm("Discard unsaved changes and open a different file?"))
       return;
+
+    try {
+      const [handle] = await window.showOpenFilePicker({
+        types: [
+          {
+            description: "Markdown / text",
+            accept: {
+              "text/markdown": [".md", ".markdown"],
+              "text/plain": [".txt"],
+            },
+          },
+        ],
+        excludeAcceptAllOption: false,
+        multiple: false,
+      });
+      const file = await handle.getFile();
+      const text = await file.text();
+      fileHandle = handle;
+      easyMDE.value(text);
+      filenameEl.value = file.name;
+      localStorage.setItem(NAME_KEY, file.name);
+      localStorage.setItem(DRAFT_KEY, text);
+      markSaved(false);
+      updateCounts();
+      toast(`Opened ${file.name}`);
+    } catch (err) {
+      if (err && err.name !== "AbortError") console.error(err);
+    }
+    return;
   }
-  
- document.getElementById("btnOpen").addEventListener("click", doOpen);
+
+  document.getElementById("btnOpen").addEventListener("click", doOpen);
 
   document.getElementById("fileInput").addEventListener("change", async (e) => {
     const file = e.target.files[0];
@@ -168,29 +175,30 @@
     toast(`Opened ${file.name}`);
   });
 
-/* ----------------------------------------------------------
+  /* ----------------------------------------------------------
    File Handling API (OS "Open With")
    ---------------------------------------------------------- */
-if ("launchQueue" in window) {
-  window.launchQueue.setConsumer(async (launchParams) => {
-    if (!launchParams.files || !launchParams.files.length) return;
+  if ("launchQueue" in window) {
+    window.launchQueue.setConsumer(async (launchParams) => {
+      if (!launchParams.files || !launchParams.files.length) return;
 
-    const handle = launchParams.files[0];
-    const file = await handle.getFile();
-    const text = await file.text();
+      const handle = launchParams.files[0];
+      const file = await handle.getFile();
+      const text = await file.text();
 
-    if (dirty && !confirm(`Discard unsaved changes and open ${file.name}?`)) return;
+      if (dirty && !confirm(`Discard unsaved changes and open ${file.name}?`))
+        return;
 
-    fileHandle = handle; // reuse it so Ctrl+S saves back to this file
-    easyMDE.value(text);
-    filenameEl.value = file.name;
-    localStorage.setItem(NAME_KEY, file.name);
-    localStorage.setItem(DRAFT_KEY, text);
-    markSaved(false);
-    updateCounts();
-    toast(`Opened ${file.name}`);
-  });
-}
+      fileHandle = handle; // reuse it so Ctrl+S saves back to this file
+      easyMDE.value(text);
+      filenameEl.value = file.name;
+      localStorage.setItem(NAME_KEY, file.name);
+      localStorage.setItem(DRAFT_KEY, text);
+      markSaved(false);
+      updateCounts();
+      toast(`Opened ${file.name}`);
+    });
+  }
 
   /* ----------------------------------------------------------
      Save / Save As
@@ -204,7 +212,6 @@ if ("launchQueue" in window) {
 
   async function doSave() {
     const name = filenameEl.value.trim() || "untitled.md";
-
 
     if (fileHandle) {
       try {
@@ -224,14 +231,15 @@ if ("launchQueue" in window) {
   async function doSaveAs() {
     const name = filenameEl.value.trim() || "untitled.md";
 
-
     try {
       const handle = await window.showSaveFilePicker({
         suggestedName: name,
-        types: [{
-          description: "Markdown",
-          accept: { "text/markdown": [".md"] },
-        }],
+        types: [
+          {
+            description: "Markdown",
+            accept: { "text/markdown": [".md"] },
+          },
+        ],
       });
       fileHandle = handle;
       await writeToHandle(handle);
@@ -247,21 +255,20 @@ if ("launchQueue" in window) {
   document.getElementById("btnSave").addEventListener("click", doSave);
   document.getElementById("btnSaveAs").addEventListener("click", doSaveAs);
 
-/* ----------------------------------------------------------
+  /* ----------------------------------------------------------
    Autosave 
    ---------------------------------------------------------- */
-const AUTOSAVE_INTERVAL = 30000; // 30s
+  const AUTOSAVE_INTERVAL = 30000; // 30s
 
-setInterval(async () => {
-  if (!dirty || !fileHandle) return;
-  try {
-    await writeToHandle(fileHandle);
-    markSaved(true);
-    toast("Autosaved");
-  } catch (err) {
-    console.error(err);
-  }
-}, AUTOSAVE_INTERVAL);
+  setInterval(async () => {
+    if (!dirty || !fileHandle) return;
+    try {
+      await writeToHandle(fileHandle);
+      markSaved(false);
+    } catch (err) {
+      console.error(err);
+    }
+  }, AUTOSAVE_INTERVAL);
 
   /* ----------------------------------------------------------
      Keyboard shortcuts
@@ -270,10 +277,19 @@ setInterval(async () => {
     const mod = e.ctrlKey || e.metaKey;
     if (!mod) return;
     const key = e.key.toLowerCase();
-    if (key === "s" && e.shiftKey) { e.preventDefault(); doSaveAs(); }
-    else if (key === "s") { e.preventDefault(); doSave(); }
-    else if (key === "o") { e.preventDefault(); doOpen(); }
-    else if (key === "n") { e.preventDefault(); doNew(); }
+    if (key === "s" && e.shiftKey) {
+      e.preventDefault();
+      doSaveAs();
+    } else if (key === "s") {
+      e.preventDefault();
+      doSave();
+    } else if (key === "o") {
+      e.preventDefault();
+      doOpen();
+    } else if (key === "n") {
+      e.preventDefault();
+      doNew();
+    }
   });
 
   /* ----------------------------------------------------------
@@ -282,58 +298,61 @@ setInterval(async () => {
 	 highlighting of errors)
      ---------------------------------------------------------- */
 
-const spTgl = document.getElementById("spellToggle")
-if (!spTgl) {
- console.log("not found")
-}
-if (spTgl) {
-spTgl.addEventListener("click", toggleSpellcheck)
-}
-function toggleSpellcheck(e) {
- e.preventDefault();
- const css = document.getElementById("spellstyle")
- css.disabled = !css.disabled
+  const spTgl = document.getElementById("spellToggle");
 
- if (css.disabled) {
-  spTgl.innerHTML="Spellcheck: on"
- } else {
-  spTgl.innerHTML="Spellcheck: off"
-}
-}
+  if (spTgl) {
+    spTgl.addEventListener("click", (e) => {
+      e.preventDefault();
+      const css = document.getElementById("spellstyle");
+      css.disabled = !css.disabled;
+
+      if (css.disabled) {
+        spTgl.innerHTML = "Spellcheck: on";
+      } else {
+        spTgl.innerHTML = "Spellcheck: off";
+      }
+    });
+  }
+
   /* ----------------------------------------------------------
      Service worker
      ---------------------------------------------------------- */
 
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register('sw.js').then((registration) => {
-    
+  const hasSW = "serviceWorker" in navigator;
+
+  if (!hasSW) {
+    return;
+  }
+
+  navigator.serviceWorker.register("sw.js").then((registration) => {
     if (registration.waiting) {
       notifyUserOfUpdate(registration.waiting);
     }
 
-    registration.addEventListener('updatefound', () => {
+    registration.addEventListener("updatefound", () => {
       const newWorker = registration.installing;
 
-      newWorker.addEventListener('statechange', () => {
-        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+      newWorker.addEventListener("statechange", () => {
+        if (
+          newWorker.state === "installed" &&
+          navigator.serviceWorker.controller
+        ) {
           notifyUserOfUpdate(newWorker);
         }
       });
     });
   });
 
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-      refreshing = true;
-      window.location.reload();
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    window.location.reload();
   });
-}
 
-function notifyUserOfUpdate(worker) {
-  const updateBanner = document.getElementById('updateNotice');
-  updateBanner.style.display = "inline";
+  function notifyUserOfUpdate(worker) {
+    const updateBanner = document.getElementById("updateNotice");
+    updateBanner.style.display = "inline";
 
-  document.getElementById('reloadBtn').onclick = () => {
-    worker.postMessage({ type: 'SKIP_WAITING' });
-  };
-}
+    document.getElementById("reloadBtn").onclick = () => {
+      worker.postMessage({ type: "SKIP_WAITING" });
+    };
+  }
 })();
