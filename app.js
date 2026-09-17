@@ -1,8 +1,15 @@
+import {
+  get,
+  set as idbSet,
+  del as idbDel,
+} from "./vendor/idbkeyval/idbkeyval.js";
+
 (function () {
   "use strict";
 
   const DRAFT_KEY = "mdeditor:draft";
   const NAME_KEY = "mdeditor:filename";
+  const FILE_HANDLE = "mdeditor:filehandle";
 
   const hasFSAccess =
     "showOpenFilePicker" in window && "showSaveFilePicker" in window;
@@ -20,14 +27,7 @@
   });
 
   if (!hasFSAccess) {
-    const warning = document.querySelector("#nonChromiumWarning");
-    warning.showModal();
-    const header = document.querySelector("header");
-    header.style.display = "none";
-    const footer = document.querySelector("footer");
-    footer.style.justifyContent = "center";
-    const nfooter = document.querySelector(".normalFooter");
-    nfooter.style.display = "none";
+    setupSimple();
     return;
   }
 
@@ -38,6 +38,16 @@
   let dirty = false;
   let lastSavedValue = "";
 
+  fileHandle = idbGet(FILE_HANDLE);
+  if (!fileHandle) {
+    fileHandle = null;
+  }
+  if (fileHandle) {
+   console.log(fileHandle.name)
+  }
+
+ console.log("file handle:", fileHandle)
+
   const filenameEl = document.getElementById("filename");
   const saveDot = document.getElementById("saveDot");
   const saveStateEl = document.getElementById("saveState");
@@ -45,11 +55,127 @@
   const toastEl = document.getElementById("toast");
 
   filenameEl.value = localStorage.getItem(NAME_KEY) || "untitled.md";
+
   const draft = localStorage.getItem(DRAFT_KEY);
+
   if (draft !== null) {
     easyMDE.value(draft);
     lastSavedValue = draft;
   }
+
+  let lastSavedTime = performance.now();
+
+  setupEventListeners();
+
+  updateCounts();
+  setDirty(false);
+
+  setupSW();
+
+  /* ----------------------------------------------------------
+     EventListeners
+---------------------------------------------------------- */
+  function setupEventListeners() {
+  
+   let saveCurrent = null
+    easyMDE.codemirror.on("change", () => {
+      clearTimeout(saveCurrent)
+      saveCurrent = setTimeout(updateUI, 300)
+    });
+
+    filenameEl.addEventListener("input", () => {
+      localStorage.setItem(NAME_KEY, filenameEl.value);
+    });
+
+    filenameEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") filenameEl.blur();
+    });
+
+    window.addEventListener("beforeunload", (e) => {
+      if (dirty) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    });
+
+    document.getElementById("btnNew").addEventListener("click", doNew);
+
+    document.getElementById("btnOpen").addEventListener("click", doOpen);
+
+    document.getElementById("btnSave").addEventListener("click", doSave);
+
+    document.getElementById("btnSaveAs").addEventListener("click", doSaveAs);
+
+    document
+      .getElementById("fileInput")
+      .addEventListener("change", async (e) => {
+        const file = e.target.files[0];
+        e.target.value = "";
+        if (!file) return;
+        const text = await file.text();
+        fileHandle = null;
+        easyMDE.value(text);
+        filenameEl.value = file.name;
+        localStorage.setItem(NAME_KEY, file.name);
+        localStorage.setItem(DRAFT_KEY, text);
+        markSaved(false);
+        updateCounts();
+        toast(`Opened ${file.name}`);
+      });
+
+    window.addEventListener("keydown", (e) => {
+      const mod = e.ctrlKey || e.metaKey;
+      if (!mod) return;
+      const key = e.key.toLowerCase();
+      if (key === "s" && e.shiftKey) {
+        e.preventDefault();
+        doSaveAs();
+      } else if (key === "s") {
+        e.preventDefault();
+        doSave();
+      } else if (key === "o") {
+        e.preventDefault();
+        doOpen();
+      } else if (key === "n") {
+        e.preventDefault();
+        doNew();
+      }
+    });
+
+    const spTgl = document.getElementById("spellToggle");
+
+    if (spTgl) {
+      spTgl.addEventListener("click", (e) => {
+        e.preventDefault();
+        const css = document.getElementById("spellstyle");
+        css.disabled = !css.disabled;
+
+        if (css.disabled) {
+          spTgl.innerHTML = "Spellcheck: on";
+        } else {
+          spTgl.innerHTML = "Spellcheck: off";
+        }
+      });
+    }
+  }
+    
+ filenameEl.addEventListener("input", () => {
+      localStorage.setItem(NAME_KEY, filenameEl.value);
+    });
+
+    filenameEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") filenameEl.blur();
+    });
+
+    window.addEventListener("beforeunload", (e) => {
+      if (dirty) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    });
+  /* ----------------------------------------------------------
+     Editor
+     ---------------------------------------------------------- */
 
   function toast(msg) {
     toastEl.textContent = msg;
@@ -75,34 +201,19 @@
     }
   }
 
-  function updateCounts() {
+  async function updateCounts() {
     const text = easyMDE.value();
     const words = text.trim().length ? text.trim().split(/\s+/).length : 0;
     countsEl.textContent = `${words} word${words === 1 ? "" : "s"} · ${text.length} character${text.length === 1 ? "" : "s"}`;
   }
 
-  easyMDE.codemirror.on("change", () => {
-    updateCounts();
-    setDirty(easyMDE.value() !== lastSavedValue);
-    localStorage.setItem(DRAFT_KEY, easyMDE.value());
-  });
-  updateCounts();
-  setDirty(false);
 
-  filenameEl.addEventListener("input", () => {
-    localStorage.setItem(NAME_KEY, filenameEl.value);
-  });
-
-  filenameEl.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") filenameEl.blur();
-  });
-
-  window.addEventListener("beforeunload", (e) => {
-    if (dirty) {
-      e.preventDefault();
-      e.returnValue = "";
+  function updateUI() {
+      updateCounts();
+      setDirty(easyMDE.value() !== lastSavedValue);
+      localStorage.setItem(DRAFT_KEY, easyMDE.value());
+      lastSavedTime = performance.now();
     }
-  });
 
   /* ----------------------------------------------------------
      New
@@ -115,11 +226,11 @@
     filenameEl.value = "untitled.md";
     localStorage.setItem(NAME_KEY, filenameEl.value);
     localStorage.removeItem(DRAFT_KEY);
+    idbDel(FILE_HANDLE);
     markSaved(false);
     updateCounts();
     toast("New file");
   }
-  document.getElementById("btnNew").addEventListener("click", doNew);
 
   /* ----------------------------------------------------------
      Open
@@ -149,6 +260,7 @@
       filenameEl.value = file.name;
       localStorage.setItem(NAME_KEY, file.name);
       localStorage.setItem(DRAFT_KEY, text);
+	  idbSet(FILE_HANDLE, flieHandle)
       markSaved(false);
       updateCounts();
       toast(`Opened ${file.name}`);
@@ -157,23 +269,6 @@
     }
     return;
   }
-
-  document.getElementById("btnOpen").addEventListener("click", doOpen);
-
-  document.getElementById("fileInput").addEventListener("change", async (e) => {
-    const file = e.target.files[0];
-    e.target.value = "";
-    if (!file) return;
-    const text = await file.text();
-    fileHandle = null;
-    easyMDE.value(text);
-    filenameEl.value = file.name;
-    localStorage.setItem(NAME_KEY, file.name);
-    localStorage.setItem(DRAFT_KEY, text);
-    markSaved(false);
-    updateCounts();
-    toast(`Opened ${file.name}`);
-  });
 
   /* ----------------------------------------------------------
    File Handling API (OS "Open With")
@@ -194,6 +289,7 @@
       filenameEl.value = file.name;
       localStorage.setItem(NAME_KEY, file.name);
       localStorage.setItem(DRAFT_KEY, text);
+	  idbSet(FILE_HANDLE, fileHandle);
       markSaved(false);
       updateCounts();
       toast(`Opened ${file.name}`);
@@ -205,26 +301,28 @@
      ---------------------------------------------------------- */
 
   async function writeToHandle(handle) {
+    if (!handle) {
+      return;
+    }
     const writable = await handle.createWritable();
     await writable.write(easyMDE.value());
     await writable.close();
+	idbSet(FILE_HANDLE, handle);
   }
 
   async function doSave() {
     const name = filenameEl.value.trim() || "untitled.md";
 
-    if (fileHandle) {
+    if (!fileHandle) {
+	 return
+	}
       try {
         await writeToHandle(fileHandle);
         markSaved(true);
         toast(`Saved ${name}`);
-      } catch (err) {
-        console.error(err);
+      } catch (_) {
         toast("Couldn't save — try Save as");
       }
-      return;
-    }
-
     await doSaveAs();
   }
 
@@ -252,9 +350,6 @@
     }
   }
 
-  document.getElementById("btnSave").addEventListener("click", doSave);
-  document.getElementById("btnSaveAs").addEventListener("click", doSaveAs);
-
   /* ----------------------------------------------------------
    Autosave 
    ---------------------------------------------------------- */
@@ -271,88 +366,74 @@
   }, AUTOSAVE_INTERVAL);
 
   /* ----------------------------------------------------------
-     Keyboard shortcuts
-     ---------------------------------------------------------- */
-  window.addEventListener("keydown", (e) => {
-    const mod = e.ctrlKey || e.metaKey;
-    if (!mod) return;
-    const key = e.key.toLowerCase();
-    if (key === "s" && e.shiftKey) {
-      e.preventDefault();
-      doSaveAs();
-    } else if (key === "s") {
-      e.preventDefault();
-      doSave();
-    } else if (key === "o") {
-      e.preventDefault();
-      doOpen();
-    } else if (key === "n") {
-      e.preventDefault();
-      doNew();
+ For browsers without file system access API
+---------------------------------------------------------- */
+
+  function setupSimple() {
+    const warning = document.querySelector("#nonChromiumWarning");
+    warning.showModal();
+    const header = document.querySelector("header");
+    header.style.display = "none";
+    const footer = document.querySelector("footer");
+    footer.style.justifyContent = "center";
+    const nfooter = document.querySelector(".normalFooter");
+    nfooter.style.display = "none";
+  }
+
+ /*------------------------------------------------------------
+   IndexedDB
+  -----------------------------------------------------------*/
+
+  async function idbGet(key) {
+    let val = await get(key);
+    if (!val) {
+      val = false;
     }
-  });
+   console.log(key, val)
+    return val;
+  }
 
   /* ----------------------------------------------------------
-     Toggle Spellcheck
-	 (spell checking is always on. What this does is show/hide
-	 highlighting of errors)
-     ---------------------------------------------------------- */
+   Service Workers 
+   ---------------------------------------------------------- */
 
-  const spTgl = document.getElementById("spellToggle");
+  function setupSW() {
+    const hasSW = "serviceWorker" in navigator;
 
-  if (spTgl) {
-    spTgl.addEventListener("click", (e) => {
-      e.preventDefault();
-      const css = document.getElementById("spellstyle");
-      css.disabled = !css.disabled;
+    if (!hasSW) {
+      return;
+    }
 
-      if (css.disabled) {
-        spTgl.innerHTML = "Spellcheck: on";
-      } else {
-        spTgl.innerHTML = "Spellcheck: off";
+    navigator.serviceWorker.register("sw.js").then((registration) => {
+      if (registration.waiting) {
+        notifyUserOfUpdate(registration.waiting);
       }
-    });
-  }
 
-  /* ----------------------------------------------------------
-     Service worker
-     ---------------------------------------------------------- */
+      registration.addEventListener("updatefound", () => {
+        const newWorker = registration.installing;
 
-  const hasSW = "serviceWorker" in navigator;
-
-  if (!hasSW) {
-    return;
-  }
-
-  navigator.serviceWorker.register("sw.js").then((registration) => {
-    if (registration.waiting) {
-      notifyUserOfUpdate(registration.waiting);
-    }
-
-    registration.addEventListener("updatefound", () => {
-      const newWorker = registration.installing;
-
-      newWorker.addEventListener("statechange", () => {
-        if (
-          newWorker.state === "installed" &&
-          navigator.serviceWorker.controller
-        ) {
-          notifyUserOfUpdate(newWorker);
-        }
+        newWorker.addEventListener("statechange", () => {
+          if (
+            newWorker.state === "installed" &&
+            navigator.serviceWorker.controller
+          ) {
+            notifyUserOfUpdate(newWorker);
+          }
+        });
       });
     });
-  });
 
-  navigator.serviceWorker.addEventListener("controllerchange", () => {
-    window.location.reload();
-  });
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      window.location.reload();
+    });
 
-  function notifyUserOfUpdate(worker) {
-    const updateBanner = document.getElementById("updateNotice");
-    updateBanner.style.display = "inline";
+    function notifyUserOfUpdate(worker) {
+      const updateBanner = document.getElementById("updateNotice");
+      updateBanner.style.display = "inline";
 
-    document.getElementById("reloadBtn").onclick = () => {
-      worker.postMessage({ type: "SKIP_WAITING" });
-    };
+      document.getElementById("reloadBtn").onclick = () => {
+        worker.postMessage({ type: "SKIP_WAITING" });
+      };
+    }
   }
 })();
