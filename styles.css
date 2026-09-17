@@ -81,11 +81,6 @@ button {
   flex: 0 1 auto;
 }
 
-.filename:hover,
-.filename:focus {
-  border-color: var(--ink);
-  outline: none;
-}
 
 .save-dot {
   width: 7px;

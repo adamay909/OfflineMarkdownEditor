@@ -4,7 +4,7 @@ import {
   del as idbDel,
 } from "./vendor/idbkeyval/idbkeyval.js";
 
-(function () {
+(async function () {
   "use strict";
 
   const DRAFT_KEY = "mdeditor:draft";
@@ -38,15 +38,10 @@ import {
   let dirty = false;
   let lastSavedValue = "";
 
-  fileHandle = idbGet(FILE_HANDLE);
+  fileHandle = await idbGet(FILE_HANDLE);
   if (!fileHandle) {
     fileHandle = null;
   }
-  if (fileHandle) {
-   console.log(fileHandle.name)
-  }
-
- console.log("file handle:", fileHandle)
 
   const filenameEl = document.getElementById("filename");
   const saveDot = document.getElementById("saveDot");
@@ -54,11 +49,15 @@ import {
   const countsEl = document.getElementById("counts");
   const toastEl = document.getElementById("toast");
 
-  filenameEl.value = localStorage.getItem(NAME_KEY) || "untitled.md";
+  let name = await idbGet(NAME_KEY)
+ if (name === undefined) {
+  name = "untitled.md"
+ }
+  filenameEl.innerText = name;
 
-  const draft = localStorage.getItem(DRAFT_KEY);
 
-  if (draft !== null) {
+  const draft = await idbGet(DRAFT_KEY);
+  if (draft !== undefined) {
     easyMDE.value(draft);
     lastSavedValue = draft;
   }
@@ -83,13 +82,7 @@ import {
       saveCurrent = setTimeout(updateUI, 300)
     });
 
-    filenameEl.addEventListener("input", () => {
-      localStorage.setItem(NAME_KEY, filenameEl.value);
-    });
 
-    filenameEl.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") filenameEl.blur();
-    });
 
     window.addEventListener("beforeunload", (e) => {
       if (dirty) {
@@ -106,22 +99,6 @@ import {
 
     document.getElementById("btnSaveAs").addEventListener("click", doSaveAs);
 
-    document
-      .getElementById("fileInput")
-      .addEventListener("change", async (e) => {
-        const file = e.target.files[0];
-        e.target.value = "";
-        if (!file) return;
-        const text = await file.text();
-        fileHandle = null;
-        easyMDE.value(text);
-        filenameEl.value = file.name;
-        localStorage.setItem(NAME_KEY, file.name);
-        localStorage.setItem(DRAFT_KEY, text);
-        markSaved(false);
-        updateCounts();
-        toast(`Opened ${file.name}`);
-      });
 
     window.addEventListener("keydown", (e) => {
       const mod = e.ctrlKey || e.metaKey;
@@ -159,13 +136,6 @@ import {
     }
   }
     
- filenameEl.addEventListener("input", () => {
-      localStorage.setItem(NAME_KEY, filenameEl.value);
-    });
-
-    filenameEl.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") filenameEl.blur();
-    });
 
     window.addEventListener("beforeunload", (e) => {
       if (dirty) {
@@ -211,7 +181,7 @@ import {
   function updateUI() {
       updateCounts();
       setDirty(easyMDE.value() !== lastSavedValue);
-      localStorage.setItem(DRAFT_KEY, easyMDE.value());
+      idbSet(DRAFT_KEY, easyMDE.value());
       lastSavedTime = performance.now();
     }
 
@@ -223,8 +193,8 @@ import {
       return;
     easyMDE.value("");
     fileHandle = null;
-    filenameEl.value = "untitled.md";
-    localStorage.setItem(NAME_KEY, filenameEl.value);
+    filenameEl.innerText = "untitled.md";
+    idbSet(NAME_KEY, filenameEl.innerText);
     localStorage.removeItem(DRAFT_KEY);
     idbDel(FILE_HANDLE);
     markSaved(false);
@@ -257,9 +227,9 @@ import {
       const text = await file.text();
       fileHandle = handle;
       easyMDE.value(text);
-      filenameEl.value = file.name;
-      localStorage.setItem(NAME_KEY, file.name);
-      localStorage.setItem(DRAFT_KEY, text);
+      filenameEl.innerText = file.name;
+      idbSet(NAME_KEY, file.name);
+      idbSet(DRAFT_KEY, text);
 	  idbSet(FILE_HANDLE, flieHandle)
       markSaved(false);
       updateCounts();
@@ -286,9 +256,9 @@ import {
 
       fileHandle = handle; // reuse it so Ctrl+S saves back to this file
       easyMDE.value(text);
-      filenameEl.value = file.name;
-      localStorage.setItem(NAME_KEY, file.name);
-      localStorage.setItem(DRAFT_KEY, text);
+      filenameEl.innerText = file.name;
+      idbSet(NAME_KEY, file.name);
+      idbSet(DRAFT_KEY, text);
 	  idbSet(FILE_HANDLE, fileHandle);
       markSaved(false);
       updateCounts();
@@ -311,7 +281,7 @@ import {
   }
 
   async function doSave() {
-    const name = filenameEl.value.trim() || "untitled.md";
+    const name = filenameEl.innerText.trim() || "untitled.md";
 
     if (!fileHandle) {
 	 return
@@ -327,7 +297,7 @@ import {
   }
 
   async function doSaveAs() {
-    const name = filenameEl.value.trim() || "untitled.md";
+    const name = filenameEl.innerText.trim() || "untitled.md";
 
     try {
       const handle = await window.showSaveFilePicker({
@@ -341,8 +311,8 @@ import {
       });
       fileHandle = handle;
       await writeToHandle(handle);
-      filenameEl.value = handle.name;
-      localStorage.setItem(NAME_KEY, handle.name);
+      filenameEl.innerText = handle.name;
+      idbSet(NAME_KEY, handle.name);
       markSaved(true);
       toast(`Saved ${handle.name}`);
     } catch (err) {
@@ -386,10 +356,6 @@ import {
 
   async function idbGet(key) {
     let val = await get(key);
-    if (!val) {
-      val = false;
-    }
-   console.log(key, val)
     return val;
   }
 
