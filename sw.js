@@ -1,5 +1,5 @@
 //change CACHE to trigger update
-const CACHE = "MDEditor-v0.5";
+const CACHE = "MDEditor-v0.6";
 
 const FILES = [
   "./",
